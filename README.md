@@ -16,7 +16,7 @@ You will need an AWS Account with IAM permissions to S3FullAccess. As well as th
 
 ## Instructions
 
-1) Clone the github into a workspace and build the Relion3 docker image. Build platform requires installation of nvidia-docker2
+1) Clone the github into a workspace and build the Relion3 docker image. Build platform requires installation of [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
 ```
 git clone https://github.com/amrragab8080/cryoem-awsbatch.git
 cd cryoem-awsbatch
