@@ -34,3 +34,7 @@ Note the fully qualified docker registry URI as you will need this for the cloud
 <p align="center">
   <img src="/imgs/cfn.png?raw=true" alt="CloudFormation"/>
 </p>
+
+5) Once you execute the cloudformation Stack a new AWS jobdefinition, queue, and compute enviroment will be stood up.
+
+6) The jobdefinition is a generic template, but does require some modification at job runtime to complete the example.
