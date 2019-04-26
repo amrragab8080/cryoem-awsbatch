@@ -1,6 +1,6 @@
 ## Executing CryoEM Workflow on AWS Batch
 
-Using a built CryoEM docker image 
+Using a built CryoEM docker image build the AWS Batch compute and example job definitions to stand up the distributed workflow 
 
 ## License Summary
 
@@ -13,3 +13,4 @@ You will need an AWS Account with IAM permissions to S3FullAccess. As well as th
 <p align="center">
   <img src="/imgs/arch.png?raw=true" alt="CryoEM Workflow Overview" width="800" height="450"/>
 </p>
+
