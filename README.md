@@ -30,3 +30,7 @@ Note the fully qualified docker registry URI as you will need this for the cloud
 
 3) In AWS Cloudformation upload the ```cloudformation/cryoem-cf.yaml```into S3 and source that location in the Cloudformation panel.
 
+4) Fill out the relevant fields for standing up the environment.
+<p align="center">
+  <img src="/imgs/cfn.png?raw=true" alt="CloudFormation"/>
+</p>
