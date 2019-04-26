@@ -14,3 +14,19 @@ You will need an AWS Account with IAM permissions to S3FullAccess. As well as th
   <img src="/imgs/arch.png?raw=true" alt="CryoEM Workflow Overview" width="800" height="450"/>
 </p>
 
+## Instructions
+
+1) Clone the github into a workspace and build the Relion3 docker image. Build platform requires installation of nvidia-docker2
+```
+git clone https://github.com/amrragab8080/cryoem-awsbatch.git
+cd cryoem-awsbatch
+docker build -t nvidia/relion3 .
+```
+Please note that the relion3 Dockerfile will git clone the Relion3 [git](https://github.com/3dem/relion.git)
+
+2) Once built you can commit this docker image to your AWS Elastic Container Registry (ECR) using [these instructions](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
+
+Note the fully qualified docker registry URI as you will need this for the cloudformation step.
+
+3) In AWS Cloudformation upload the ```cloudformation/cryoem-cf.yaml```into S3 and source that location in the Cloudformation panel.
+
