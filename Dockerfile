@@ -1,4 +1,4 @@
-FROM nvidia/cuda:latest
+FROM nvidia/cuda:9.2-devel-ubuntu16.04
 
 LABEL maintainer="amrraga@amazon.com"
 

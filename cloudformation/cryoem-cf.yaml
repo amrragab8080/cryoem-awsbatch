@@ -18,10 +18,15 @@ Parameters:
     Type: List<AWS::EC2::Subnet::Id>
     ConstraintDescription: Select at least 2 subnets across multiple AZs for best performance. The subnets needs to have a S3 VPC Endpoint for S3 Bucket Access, if you havent setup a NAT
 
-  CryoEMImage:
+  CryoEMECR:
     Description: Provide the fully qualified CryoEM Docker image from ECR 
     Type: String
     Default: '<accountid>.dkr.ecr.<region>.amazonaws.com/cryoem:latest'
+  
+  CryoAMI:
+    Description: Provide the AMI ID for the base ECS InstanceProfile
+    Type: String
+    Default: ami-
 
   MaxvCPU:
     Description:
@@ -122,7 +127,7 @@ Resources:
 
         Memory: 728000
         Vcpus: 62
-        Image: !Ref CryoEMImage
+        Image: !Ref CryoEMECR
 
   ComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
@@ -146,6 +151,7 @@ Resources:
           - p3
           - p3dn.24xlarge
         Ec2KeyPair: !Ref KeyName
+        ImageId: !Ref CryoAMI
         Tags: {"Name": "cryoem-processor"}
       State: ENABLED
 
