@@ -37,11 +37,11 @@ Note the fully qualified docker registry URI as you will need this for the cloud
 
 5) Once you execute the cloudformation Stack a new AWS jobdefinition, queue, and compute enviroment will be stood up.
 ```
-IAM Role for AWSBatchServiceRole - Used for AWS Batch to call additional services on your behalf
-CryoEMECSInstanceRole - Used on the ECS Instance level to access resources on the account, in this example S3
-CryoEM Batch Compute Enviroment - Used to create a the compute enviroment definition, here we are using the entire p2, p3 families as included instances types as well as the p3dn.24xl
-CryoEM Job Queue - Queue priority to submit jobs to the above compute enviroment
-CryoEM Job Definition - Basic job definition template which defines the job submittion parameters
+- IAM Role for AWSBatchServiceRole - Used for AWS Batch to call additional services on your behalf
+- CryoEMECSInstanceRole - Used on the ECS Instance level to access resources on the account, in this example S3
+- CryoEM Batch Compute Enviroment - Used to create a the compute enviroment definition, here we are using the entire p2, p3 families as included instances types as well as the p3dn.24xl
+- CryoEM Job Queue - Queue priority to submit jobs to the above compute enviroment
+- CryoEM Job Definition - Basic job definition template which defines the job submittion parameters
 ```
 The jobdefinition is a generic template, but does require some modification at job runtime to complete the example. The startup command here:
 ```/app/cryo_wrapper.sh mpirun --allow-run-as-root -np Ref::mpithreads /opt/relion/bin/relion_refine_mpi```
