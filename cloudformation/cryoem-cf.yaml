@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS Batch Setup for CryoEM Workloads
+
+Parameters:
+
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+
+  VPCName:
+    Description: Select the VPC to deploy resources in
+    Type: 'AWS::EC2::VPC::Id'
+    ConstraintDescription: Must be the name of an existing VPC Id
+
+  PrivateSubnet1Param:
+    Description: Select the Private Subnet
+    Type: List<AWS::EC2::Subnet::Id>
+    ConstraintDescription: Select at least 2 subnets across multiple AZs for best performance. The subnets needs to have a S3 VPC Endpoint for S3 Bucket Access, if you havent setup a NAT
+
+  CryoEMImage:
+    Description: Provide the fully qualified CryoEM Docker image from ECR 
+    Type: String
+    Default: '<accountid>.dkr.ecr.<region>.amazonaws.com/cryoem:latest'
+
+  MaxvCPU:
+    Description:
+      Max vCPUs to set for the Batch Compute Enviroment. Defined by the EC2 instance limits.
+    Type: Number
+    Default: 4096
+
+Resources:
+  BatchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub BatchServiceRole_${AWS::StackName}
+      Path: /service-role/
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - 'batch.amazonaws.com'
+              Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"]
+  
+  CryoClusterSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Cryo cluster node ruleset
+      VpcId: !Ref VPCName
+
+  ECSInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub cryoECSInstanceRole_${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - 'ec2.amazonaws.com'
+              Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"]
+      Policies:
+      - PolicyName: CryoS3
+        PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                Resource: '*'
+
+  IamInstanceProfile:
+    DependsOn: ECSInstanceRole
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref ECSInstanceRole
+  
+  JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref ComputeEnvironment
+      State: ENABLED
+      Priority: 1
+      JobQueueName: cryoem-q
+
+  JobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      Type: container
+      JobDefinitionName: cryoem-gpu-jobdef
+      ContainerProperties:
+        MountPoints:
+          - ReadOnly: false
+            SourceVolume: scratch
+            ContainerPath: /scratch
+        Volumes:
+          - Host:
+              SourcePath: /scratch
+            Name: scratch
+        Command:
+          - /app/cryo_wrapper.sh mpirun --allow-run-as-root -np Ref::mpithreads /opt/relion/bin/relion_refine_mpi
+        Environment: 
+          -
+            Name: JOBDIR
+            Value: /scratch
+
+        Memory: 728000
+        Vcpus: 62
+        Image: !Ref CryoEMImage
+
+  ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      Type: MANAGED
+      ServiceRole: !GetAtt BatchServiceRole.Arn
+      ComputeEnvironmentName: !Sub cryoem-compute_${AWS::StackName}
+      ComputeResources:
+        SecurityGroupIds: 
+          - !Ref CryoClusterSG
+        Type: EC2
+        Subnets: 
+          - !Select ['0', !Ref PrivateSubnet1Param]
+          - !Select ['1', !Ref PrivateSubnet1Param]
+        MinvCpus: 0
+        DesiredvCpus: 0
+        MaxvCpus: 4096
+        InstanceRole: !GetAtt IamInstanceProfile.Arn
+        InstanceTypes:
+          - p2
+          - p3
+          - p3dn.24xlarge
+        Ec2KeyPair: !Ref KeyName
+        Tags: {"Name": "cryoem-processor"}
+      State: ENABLED
+
+
+Outputs:
+  JobDefinitionARN:
+    Description: Job Definition Template for CryoEM Jobs
+    Value: !Ref JobDefinition
+  ComputeEnvironmentARN:
+    Description: Compute Enviroment
+    Value: !Ref ComputeEnvironment
