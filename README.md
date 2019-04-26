@@ -43,7 +43,7 @@ CryoEM Batch Compute Enviroment - Used to create a the compute enviroment defini
 CryoEM Job Queue - Queue priority to submit jobs to the above compute enviroment
 CryoEM Job Definition - Basic job definition template which defines the job submittion parameters
 ```
-6) The jobdefinition is a generic template, but does require some modification at job runtime to complete the example. The startup command here:
+The jobdefinition is a generic template, but does require some modification at job runtime to complete the example. The startup command here:
 ```/app/cryo_wrapper.sh mpirun --allow-run-as-root -np Ref::mpithreads /opt/relion/bin/relion_refine_mpi```
 
 Needs to have appened the flags for the various workloads, we running the refine step across multiple GPUs. The full command stack for example running classficiation 3D is:
