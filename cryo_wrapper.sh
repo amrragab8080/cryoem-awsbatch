@@ -16,8 +16,7 @@ else
    export CRYO_SYSTEM
 fi
 
-$@ &
-cryopid=$!
+$@
 
 echo "JOB FINISHED, COMPRESSING OUTPUT..."
 tar -czvf $JOBDIR/batch_output_$AWS_BATCH_JOB_ID.tar.gz $JOBDIR/$AWS_BATCH_JOB_ID/*
