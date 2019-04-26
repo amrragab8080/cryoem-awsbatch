@@ -113,6 +113,12 @@ Resources:
           -
             Name: JOBDIR
             Value: /scratch
+          -
+            Name: S3_INPUT
+            Value: s3://
+          -
+            Name: S3_OUTPUT
+            Value: s3://
 
         Memory: 728000
         Vcpus: 62
