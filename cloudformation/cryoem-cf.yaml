@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWS Batch Setup for CryoEM Workloads
+Description: AWS Batch Setup for CryoEM Workloads.
 
 Parameters:
 
@@ -21,7 +21,7 @@ Parameters:
   CryoEMECR:
     Description: Provide the fully qualified CryoEM Docker image from ECR 
     Type: String
-    Default: '<accountid>.dkr.ecr.<region>.amazonaws.com/cryoem:latest'
+    Default: '<accountid>.dkr.ecr.<region>.amazonaws.com/nvidia/relion3:latest'
   
   CryoAMI:
     Description: Provide the AMI ID for the base ECS InstanceProfile
@@ -103,6 +103,7 @@ Resources:
     Properties:
       Type: container
       JobDefinitionName: cryoem-gpu-jobdef
+      Parameters: {"mpithreads": "8"}
       ContainerProperties:
         MountPoints:
           - ReadOnly: false
