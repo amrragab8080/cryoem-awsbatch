@@ -16,7 +16,7 @@ aws s3 cp $S3_INPUT $JOBDIR/$AWS_BATCH_JOB_ID
 tar -xvf $JOBDIR/$AWS_BATCH_JOB_ID/*.tar.gz -C $JOBDIR/$AWS_BATCH_JOB_ID --strip 1
 
 echo "STARTING UP MAIN CRYOEM WORKFLOW..." 
-cd $SCRATCHDIR
+cd $JOBDIR/$AWS_BATCH_JOB_ID
 if [[ -z "${AWS_BATCH_JOB_ARRAY_INDEX}" ]]; then
    :
 else
