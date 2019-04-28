@@ -125,7 +125,7 @@ Resources:
             Name: S3_OUTPUT
             Value: s3://
 
-        Memory: 728000
+        Memory: 424000
         Vcpus: 62
         Image: !Ref CryoEMECR
 
