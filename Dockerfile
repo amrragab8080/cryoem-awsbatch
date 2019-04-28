@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-devel-ubuntu16.04
+FROM nvidia/cuda:9.0-devel-ubuntu16.04
 
 LABEL maintainer="amrraga@amazon.com"
 
@@ -65,19 +65,19 @@ RUN wget -O /tmp/openmpi.tar.gz https://download.open-mpi.org/release/open-mpi/v
     tar -xvf /tmp/openmpi.tar.gz -C /tmp
 RUN cd /tmp/openmpi* && ./configure --prefix=/opt/openmpi --with-cuda --enable-mpirun-prefix-by-default && \
     make -j $(nproc) && make install
-RUN echo "export PATH=$PATH:/opt/openmpi/bin" >> /etc/bash.bashrc
-RUN echo "export LD_LIBRARY_PATH=$LD_LIRBARY_PATH:/opt/openmpi/lib:/usr/local/cuda/include:/usr/local/cuda/lib64" >> /etc/bash.bashrc
+RUN echo "export PATH=/opt/openmpi/bin:$PATH" >> /etc/bash.bashrc
+RUN echo "export LD_LIBRARY_PATH=/opt/openmpi/lib:/usr/local/cuda/include:/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> /etc/bash.bashrc
 
 ###################################################
 ## RELION INSTALL
 
-ENV PATH $PATH:/opt/openmpi/bin
-ENV LD_LIBRARY_PATH $LD_LIRBARY_PATH:/opt/openmpi/lib:/usr/local/cuda/include:/usr/local/cuda/lib64
+ENV PATH /opt/openmpi/bin:$PATH
+ENV LD_LIBRARY_PATH /opt/openmpi/lib:/usr/local/cuda/include:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 RUN git clone https://github.com/3dem/relion.git /root/relion
 RUN cd /root/relion && mkdir build
 RUN cd /root/relion/build && \
-	cmake -DGUI=OFF -DCUDA=ON -DCudaTexture=ON -DCMAKE_INSTALL_PREFIX=/opt/relion .. && make -j $(nproc) && make install
+	cmake -DGUI=OFF -DCUDA=ON -DCudaTexture=ON -DCMAKE_INSTALL_PREFIX=/opt/relion -DCUDA_ARCH='35 -gencode=arch=compute_50,code=sm_50 -gencode=arch=compute_70,code=sm_70' .. && make -j $(nproc) && make install
 
 ####################################################
 ## CRYO WRAPPER
