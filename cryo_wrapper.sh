@@ -9,8 +9,8 @@ else
 fi
 ###################################
 echo "DOWNLOADING CRYOEM INPUT FILES..."
-mkdir -p $JOBDIR/$AWS_BATCH_JOB_ID/scratch
 export SCRATCHDIR=$JOBDIR/$AWS_BATCH_JOB_ID/scratch
+mkdir -p $SCRATCHDIR
 
 aws s3 cp $S3_INPUT $JOBDIR/$AWS_BATCH_JOB_ID
 tar -xvf $JOBDIR/$AWS_BATCH_JOB_ID/*.tar.gz -C $JOBDIR/$AWS_BATCH_JOB_ID --strip 1
@@ -29,7 +29,7 @@ $@ --o $SCRATCHDIR
 
 echo "JOB FINISHED, COMPRESSING OUTPUT..."
 
-tar -czvf $JOBDIR/batch_output_$AWS_BATCH_JOB_ID.tar.gz $SCRATCHDIR/*
+tar czvf $JOBDIR/batch_output_$AWS_BATCH_JOB_ID.tar.gz $SCRATCHDIR
 aws s3 cp $JOBDIR/batch_output_$AWS_BATCH_JOB_ID.tar.gz $S3_OUTPUT
 
 echo "CLEANUP..."
