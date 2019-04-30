@@ -8,7 +8,7 @@ This sample code is made available under a MIT license. See the LICENSE file.
 
 ## Requirements
 
-You will need an AWS Account with IAM permissions to S3FullAccess. As well as the ability to execute CloudFormation scripts. The cloudformation script will provision an . Permissions to create the network topology will be needed.
+You will need an AWS Account with IAM permissions to S3FullAccess. As well as the ability to execute CloudFormation scripts. The cloudformation script will provision an additional AWSBatchService Role with [the following](https://docs.aws.amazon.com/batch/latest/userguide/service_IAM_role.html) permissions.
 
 <p align="center">
   <img src="/imgs/arch.png?raw=true" alt="CryoEM Workflow Overview" width="800" height="450"/>
