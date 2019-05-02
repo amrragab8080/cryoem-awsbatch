@@ -14,7 +14,7 @@ You will need an AWS Account with IAM permissions to S3FullAccess. As well as th
   <img src="/imgs/arch.png?raw=true" alt="CryoEM Workflow Overview" width="800" height="450"/>
 </p>
 
-Create an ECS AMI using the Amazon Linux 2 (GPU) AMIs referenced [here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html). Upgrade the GPU driver to the latest provided by NVIDIA, and attach a EBS volume an mount to the path ```/scratch``` Save this AMI in your account noting the AMI ID.
+Create an ECS AMI using the Amazon Linux 2 (GPU) AMIs referenced [here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html). Upgrade the GPU driver to the latest provided by NVIDIA, and attach a EBS volume an mount to the path ```/scratch```. Save this AMI in your account noting the AMI ID.
 
 ## Instructions
 
