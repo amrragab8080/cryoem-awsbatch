@@ -24,7 +24,7 @@ Parameters:
     Default: '<accountid>.dkr.ecr.<region>.amazonaws.com/nvidia/relion3:latest'
   
   CryoAMI:
-    Description: Provide the AMI ID for the base ECS InstanceProfile
+    Description: Provide the AMI ID for the base ECS Instance
     Type: String
     Default: ami-
 
@@ -33,6 +33,23 @@ Parameters:
       Max vCPUs to set for the Batch Compute Enviroment. Defined by the EC2 instance limits.
     Type: Number
     Default: 4096
+
+  ComputeCostModel:
+    Description:
+      Choose either the EC2 or Spot cost model ComputeEnvironment in AWS Batch
+    Default: EC2
+    Type: String
+    AllowedValues: [EC2, SPOT]
+
+  CryoEMBidPercentage:
+    Description:
+      Set the % OnDemand Threshold for Spot Requests. Will be ignored if ComputeCostModel is EC2
+    Type: Number
+    Default: 90
+
+Conditions:
+  SpotCreateResource: !Equals [ SPOT, !Ref ComputeCostModel ]
+  EC2CreateResource: !Equals [ EC2, !Ref ComputeCostModel ]
 
 Resources:
   BatchServiceRole:
@@ -103,7 +120,7 @@ Resources:
     Properties:
       Type: container
       JobDefinitionName: cryoem-gpu-jobdef
-      Parameters: {"mpithreads": "8"}
+      Parameters: {"mpithreads": "9"}
       ContainerProperties:
         MountPoints:
           - ReadOnly: false
@@ -132,6 +149,7 @@ Resources:
 
   ComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
+    Condition: EC2CreateResource
     Properties:
       Type: MANAGED
       ServiceRole: !GetAtt BatchServiceRole.Arn
@@ -147,7 +165,7 @@ Resources:
         DesiredvCpus: 0
         MaxvCpus: 4096
         InstanceRole: !GetAtt IamInstanceProfile.Arn
-        InstanceTypes:
+        InstanceTypes: 
           - p2
           - p3
           - p3dn.24xlarge
@@ -156,11 +174,56 @@ Resources:
         Tags: {"Name": "cryoem-processor"}
       State: ENABLED
 
+  EC2SpotFleetRole:
+    Type: AWS::IAM::Role
+    Condition: SpotCreateResource
+    Properties:
+      RoleName: !Sub SpotFleetRole_${AWS::StackName}
+      Path: /service-role/
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - 'spotfleet.amazonaws.com'
+              Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole",
+                          "arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetRole"]
+
+  ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Condition: SpotCreateResource
+    Properties:
+      Type: MANAGED
+      ServiceRole: !GetAtt BatchServiceRole.Arn
+      ComputeEnvironmentName: !Sub cryoem-spot-compute_${AWS::StackName}
+      ComputeResources:
+        SpotIamFleetRole: !GetAtt EC2SpotFleetRole.Arn
+        BidPercentage: !Ref CryoEMBidPercentage
+        SecurityGroupIds: 
+          - !Ref CryoClusterSG
+        Type: SPOT
+        Subnets: 
+          - !Select ['0', !Ref PrivateSubnet1Param]
+          - !Select ['1', !Ref PrivateSubnet1Param]
+        MinvCpus: 0
+        DesiredvCpus: 0
+        MaxvCpus: 4096
+        InstanceRole: !GetAtt IamInstanceProfile.Arn
+        InstanceTypes:
+          - p2.8xlarge
+        Ec2KeyPair: !Ref KeyName
+        ImageId: !Ref CryoAMI
+        Tags: {"Name": "cryoem-spot-processor"}
+      State: ENABLED
 
 Outputs:
   JobDefinitionARN:
     Description: Job Definition Template for CryoEM Jobs
     Value: !Ref JobDefinition
   ComputeEnvironmentARN:
-    Description: Compute Enviroment
+    Description: Compute Environment
     Value: !Ref ComputeEnvironment
+

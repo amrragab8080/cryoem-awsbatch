@@ -41,6 +41,7 @@ Note the fully qualified docker registry URI as you will need this for the cloud
 ```
 - IAM Role for AWSBatchServiceRole - Used for AWS Batch to call additional services on your behalf
 - CryoEMECSInstanceRole - Used on the ECS Instance level to access resources on the account, in this example S3
+- SpotFleetRole - When using the SPOT cost model in the compute enviroment, will create the appropiate IAM Role to make spot requests on your behalf
 - CryoEM Batch Compute Enviroment - Used to create a the compute enviroment definition, here we are using the entire p2, p3 families as included instances types as well as the p3dn.24xl
 - CryoEM Job Queue - Queue priority to submit jobs to the above compute enviroment
 - CryoEM Job Definition - Basic job definition template which defines the job submittion parameters
