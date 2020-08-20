@@ -13,7 +13,7 @@ ENV USER root
 # -------------------------------------------------------------------------------------
 
 RUN apt update
-RUN DEBIAN_FRONTEND=noninteractive apt install -y iproute2 openssh-server openssh-client python python-pip build-essential gfortran wget curl libfftw3-dev git
+RUN DEBIAN_FRONTEND=noninteractive apt install -y iproute2 openssh-server openssh-client python python-pip build-essential gfortran wget curl libfftw3-dev git libtiff5 libtiff5-dev
 RUN pip install supervisor awscli
 
 RUN mkdir -p /var/run/sshd
@@ -74,7 +74,7 @@ RUN echo "export LD_LIBRARY_PATH=/opt/openmpi/lib:/usr/local/cuda/include:/usr/l
 ENV PATH /opt/openmpi/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/openmpi/lib:/usr/local/cuda/include:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-RUN git clone https://github.com/3dem/relion.git /root/relion
+RUN git clone https://github.com/3dem/relion.git -b 3.1.0 /root/relion
 RUN cd /root/relion && mkdir build
 RUN cd /root/relion/build && \
 	cmake -DGUI=OFF -DCUDA=ON -DCudaTexture=ON -DCMAKE_INSTALL_PREFIX=/opt/relion -DCUDA_ARCH='35 -gencode=arch=compute_50,code=sm_50 -gencode=arch=compute_70,code=sm_70' .. && make -j $(nproc) && make install
